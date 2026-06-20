@@ -1,0 +1,65 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-surface-light text-slate-800 transition-colors duration-300;
+  }
+  .dark body {
+    @apply bg-surface-dark text-slate-100;
+  }
+}
+
+@layer components {
+  /* Aurora gradient blob for hero backgrounds */
+  .aurora-blob {
+    @apply absolute rounded-full blur-3xl opacity-30 animate-glow;
+  }
+
+  /* Glass card effect */
+  .glass-card {
+    @apply bg-white/70 dark:bg-surface-dark-card/70 backdrop-blur-lg
+           border border-white/20 dark:border-slate-700/50
+           rounded-2xl shadow-lg;
+  }
+
+  /* Gradient text */
+  .gradient-text {
+    @apply bg-clip-text text-transparent bg-aurora;
+  }
+
+  /* Tag pill */
+  .tag-pill {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium
+           bg-brand-100 text-brand-700 dark:bg-brand-900/40 dark:text-brand-300;
+  }
+
+  /* Section container */
+  .section-container {
+    @apply max-w-6xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+}
+
+@layer utilities {
+  /* Smooth scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Selection highlight */
+  ::selection {
+    @apply bg-brand-200 dark:bg-brand-800;
+  }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    @apply w-2;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-slate-300 dark:bg-slate-600 rounded-full;
+  }
+}
