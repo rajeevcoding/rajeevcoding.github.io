@@ -24,6 +24,7 @@ import ProjectsManager from './pages/admin/ProjectsManager';
 import BlogManager, { BlogEditor } from './pages/admin/BlogManager';
 import ContactsViewer from './pages/admin/ContactsViewer';
 import CommentsManager from './pages/admin/CommentsManager';
+import UsersManager from './pages/admin/UsersManager';
 import NewsletterManager from './pages/admin/NewsletterManager';
 import AnalyticsViewer from './pages/admin/AnalyticsViewer';
 
@@ -78,6 +79,7 @@ export default function App() {
             <Route path="admin/contacts" element={<ContactsViewer />} />
             <Route path="admin/comments" element={<CommentsManager />} />
             <Route path="admin/newsletter" element={<NewsletterManager />} />
+            <Route path="admin/users" element={<UsersManager />} />
             <Route path="admin/analytics" element={<AnalyticsViewer />} />
           </Route>
         </Route>
