@@ -28,13 +28,45 @@ export function AuthProvider({ children }) {
     return data;
   };
 
+  const signInWithGitHub = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'github',
+      options: { redirectTo: window.location.origin + window.location.pathname },
+    });
+    if (error) throw error;
+  };
+
+  const signInWithGoogle = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: window.location.origin + window.location.pathname },
+    });
+    if (error) throw error;
+  };
+
   const signOut = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
   };
 
+  // Helper: get display name from user metadata
+  const getUserDisplayName = () => {
+    if (!user) return null;
+    const meta = user.user_metadata || {};
+    return meta.full_name || meta.name || meta.user_name || user.email?.split('@')[0] || 'Anonymous';
+  };
+
+  const getUserAvatar = () => {
+    if (!user) return null;
+    const meta = user.user_metadata || {};
+    return meta.avatar_url || meta.picture || null;
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, signOut }}>
+    <AuthContext.Provider value={{
+      user, loading, signIn, signInWithGitHub, signInWithGoogle, signOut,
+      getUserDisplayName, getUserAvatar,
+    }}>
       {children}
     </AuthContext.Provider>
   );
