@@ -211,3 +211,90 @@ export async function uploadFile(bucket, path, file) {
   const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(path);
   return urlData.publicUrl;
 }
+
+// ── Blog Likes ──────────────────────────────────────
+export async function getPostLikeCount(postId) {
+  const { data, error } = await supabase.rpc('get_post_likes', { target_post_id: postId });
+  if (error) { console.error(error); return 0; }
+  return data || 0;
+}
+
+export async function hasUserLikedPost(postId, userId) {
+  if (!userId) return false;
+  const { data, error } = await supabase.rpc('has_user_liked', {
+    target_post_id: postId,
+    target_user_id: userId,
+  });
+  if (error) { console.error(error); return false; }
+  return !!data;
+}
+
+export async function toggleLike(postId, userId) {
+  // Check if already liked
+  const liked = await hasUserLikedPost(postId, userId);
+  if (liked) {
+    const { error } = await supabase
+      .from('blog_likes')
+      .delete()
+      .eq('post_id', postId)
+      .eq('user_id', userId);
+    if (error) throw error;
+    return false; // unliked
+  } else {
+    const { error } = await supabase
+      .from('blog_likes')
+      .insert({ post_id: postId, user_id: userId });
+    if (error) throw error;
+    return true; // liked
+  }
+}
+
+// ── Blog Comments ───────────────────────────────────
+export async function getPostComments(postId) {
+  const { data, error } = await supabase
+    .from('blog_comments')
+    .select('*')
+    .eq('post_id', postId)
+    .order('created_at', { ascending: true });
+  if (error) throw error;
+  return data || [];
+}
+
+export async function addComment({ postId, userId, parentId, content, authorName, authorAvatar }) {
+  const { data, error } = await supabase
+    .from('blog_comments')
+    .insert({
+      post_id: postId,
+      user_id: userId,
+      parent_id: parentId || null,
+      content,
+      author_name: authorName,
+      author_avatar: authorAvatar || '',
+    })
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function deleteComment(id) {
+  const { error } = await supabase.from('blog_comments').delete().eq('id', id);
+  if (error) throw error;
+}
+
+export async function getAllComments() {
+  const { data, error } = await supabase
+    .from('blog_comments')
+    .select('*, blog_posts(title, slug)')
+    .order('created_at', { ascending: false });
+  if (error) throw error;
+  return data || [];
+}
+
+export async function toggleCommentFlag(id, flagged) {
+  const { error } = await supabase
+    .from('blog_comments')
+    .update({ is_flagged: flagged })
+    .eq('id', id);
+  if (error) throw error;
+}
