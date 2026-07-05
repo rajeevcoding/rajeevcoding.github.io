@@ -2,13 +2,23 @@ import { supabase } from './supabase';
 
 // ── Profile ──────────────────────────────────────────
 export async function getProfile() {
+  // Try to get the admin profile first
   const { data, error } = await supabase
     .from('profiles')
     .select('*')
     .eq('is_admin', true)
+    .maybeSingle();
+
+  if (data) return data;
+
+  // Fallback: get the first profile (for cases where is_admin hasn't been set yet)
+  const { data: fallback, error: fbError } = await supabase
+    .from('profiles')
+    .select('*')
+    .limit(1)
     .single();
-  if (error) throw error;
-  return data;
+  if (fbError) throw fbError;
+  return fallback;
 }
 
 export async function updateProfile(updates) {
