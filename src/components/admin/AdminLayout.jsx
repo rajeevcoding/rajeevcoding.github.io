@@ -1,7 +1,7 @@
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, FileText, FolderKanban, Briefcase, MessageSquare,
-  Mail, BarChart3, User, LogOut, Menu, X, Home,
+  Mail, BarChart3, User, LogOut, Menu, X, Home, MessageCircle,
 } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
@@ -13,6 +13,7 @@ const navItems = [
   { to: '/admin/experiences', icon: Briefcase,       label: 'Experiences' },
   { to: '/admin/projects',    icon: FolderKanban,    label: 'Projects' },
   { to: '/admin/blog',        icon: FileText,        label: 'Blog Posts' },
+  { to: '/admin/comments',    icon: MessageCircle,   label: 'Comments' },
   { to: '/admin/contacts',    icon: MessageSquare,   label: 'Messages' },
   { to: '/admin/newsletter',  icon: Mail,            label: 'Newsletter' },
   { to: '/admin/analytics',   icon: BarChart3,       label: 'Analytics' },
