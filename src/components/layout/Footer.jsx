@@ -43,6 +43,15 @@ export default function Footer() {
         </div>
 
         <div className="mt-8 pt-6 border-t border-slate-200/30 dark:border-slate-700/30 text-center">
+          <div className="flex items-center justify-center gap-4 mb-3">
+            <a href="/terms" className="text-xs text-slate-400 dark:text-slate-500 hover:text-brand-600 dark:hover:text-brand-400 transition-colors">
+              Terms &amp; Conditions
+            </a>
+            <span className="text-xs text-slate-300 dark:text-slate-600">·</span>
+            <a href="/privacy" className="text-xs text-slate-400 dark:text-slate-500 hover:text-brand-600 dark:hover:text-brand-400 transition-colors">
+              Privacy Policy
+            </a>
+          </div>
           <p className="text-xs text-slate-400 dark:text-slate-500">
             &copy; {year} All rights reserved.
           </p>
