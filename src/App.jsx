@@ -23,6 +23,7 @@ import ExperiencesManager from './pages/admin/ExperiencesManager';
 import ProjectsManager from './pages/admin/ProjectsManager';
 import BlogManager, { BlogEditor } from './pages/admin/BlogManager';
 import ContactsViewer from './pages/admin/ContactsViewer';
+import CommentsManager from './pages/admin/CommentsManager';
 import NewsletterManager from './pages/admin/NewsletterManager';
 import AnalyticsViewer from './pages/admin/AnalyticsViewer';
 
@@ -75,6 +76,7 @@ export default function App() {
             <Route path="admin/blog/new" element={<BlogEditor />} />
             <Route path="admin/blog/:id" element={<BlogEditor />} />
             <Route path="admin/contacts" element={<ContactsViewer />} />
+            <Route path="admin/comments" element={<CommentsManager />} />
             <Route path="admin/newsletter" element={<NewsletterManager />} />
             <Route path="admin/analytics" element={<AnalyticsViewer />} />
           </Route>
