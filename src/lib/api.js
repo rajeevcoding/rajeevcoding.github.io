@@ -5,6 +5,7 @@ export async function getProfile() {
   const { data, error } = await supabase
     .from('profiles')
     .select('*')
+    .eq('is_admin', true)
     .single();
   if (error) throw error;
   return data;
