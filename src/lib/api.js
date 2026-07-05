@@ -298,3 +298,26 @@ export async function toggleCommentFlag(id, flagged) {
     .eq('id', id);
   if (error) throw error;
 }
+
+// ── User Management (Admin) ─────────────────────────
+export async function getAllUsers() {
+  const { data, error } = await supabase.rpc('get_all_users');
+  if (error) throw error;
+  return data || [];
+}
+
+export async function banUser(userId, ban = true) {
+  const { error } = await supabase.rpc('ban_user', {
+    target_user_id: userId,
+    ban,
+  });
+  if (error) throw error;
+}
+
+export async function setUserAdmin(userId, adminStatus) {
+  const { error } = await supabase.rpc('set_user_admin', {
+    target_user_id: userId,
+    admin_status: adminStatus,
+  });
+  if (error) throw error;
+}
