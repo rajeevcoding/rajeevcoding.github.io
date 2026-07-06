@@ -8,6 +8,7 @@ import { formatFullDate, readingTime } from '../../lib/utils';
 import SEO from '../../components/ui/SEO';
 import LikeButton from '../../components/blog/LikeButton';
 import CommentsSection from '../../components/blog/CommentsSection';
+import ShareButton from '../../components/blog/ShareButton';
 
 export default function BlogPost() {
   const { slug } = useParams();
@@ -101,10 +102,14 @@ export default function BlogPost() {
           </ReactMarkdown>
         </div>
 
-        {/* Like button */}
-        <div className="mt-10 pt-6 border-t border-slate-200 dark:border-slate-700 flex items-center gap-4">
+        {/* Like + Share */}
+        <div className="mt-10 pt-6 border-t border-slate-200 dark:border-slate-700 flex items-center gap-3">
           <LikeButton postId={post.id} />
-          <span className="text-sm text-slate-400">Did you find this helpful?</span>
+          <ShareButton
+            title={post.title}
+            text={post.excerpt || post.title}
+            url={window.location.href}
+          />
         </div>
 
         {/* Comments */}
