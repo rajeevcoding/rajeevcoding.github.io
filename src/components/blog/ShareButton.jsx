@@ -40,10 +40,11 @@ export default function ShareButton({ postId, title, text, url, count = 0 }) {
     // Use native Web Share API on mobile / supported browsers
     if (navigator.share) {
       try {
+        // Combine text + URL in the text field for iOS Safari compatibility
+        // (iOS often ignores the text param when url is provided separately)
         await navigator.share({
           title: shareTitle,
-          text: shareText,
-          url: shareUrl,
+          text: shareText ? `${shareText}\n\n${shareUrl}` : shareUrl,
         });
         trackShare();
         return;
