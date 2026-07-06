@@ -114,6 +114,11 @@ export async function incrementPostViews(id) {
   if (error) console.error('Failed to increment views:', error);
 }
 
+export async function incrementPostShares(id) {
+  const { error } = await supabase.rpc('increment_shares', { post_id: id });
+  if (error) console.error('Failed to increment shares:', error);
+}
+
 export async function upsertBlogPost(post) {
   const { data, error } = await supabase
     .from('blog_posts')
