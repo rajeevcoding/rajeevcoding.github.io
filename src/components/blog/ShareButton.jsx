@@ -1,14 +1,18 @@
 import { useState, useRef, useEffect } from 'react';
 import { Share2, Link, Check, Twitter, Linkedin, Mail } from 'lucide-react';
+import { incrementPostShares } from '../../lib/api';
 
-export default function ShareButton({ title, text, url }) {
+export default function ShareButton({ postId, title, text, url, count = 0 }) {
   const [showMenu, setShowMenu] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [shareCount, setShareCount] = useState(count);
   const menuRef = useRef(null);
 
   const shareUrl = url || window.location.href;
   const shareText = text || '';
   const shareTitle = title || '';
+
+  useEffect(() => { setShareCount(count); }, [count]);
 
   // Close menu on outside click
   useEffect(() => {
@@ -21,6 +25,13 @@ export default function ShareButton({ title, text, url }) {
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
+  const trackShare = () => {
+    if (postId) {
+      incrementPostShares(postId);
+      setShareCount((c) => c + 1);
+    }
+  };
+
   const handleShare = async () => {
     // Use native Web Share API on mobile / supported browsers
     if (navigator.share) {
@@ -30,9 +41,9 @@ export default function ShareButton({ title, text, url }) {
           text: shareText,
           url: shareUrl,
         });
+        trackShare();
         return;
       } catch (err) {
-        // User cancelled or share failed — fall through to menu
         if (err.name === 'AbortError') return;
       }
     }
@@ -43,19 +54,22 @@ export default function ShareButton({ title, text, url }) {
   const handleCopyLink = async () => {
     try {
       await navigator.clipboard.writeText(shareUrl);
-      setCopied(true);
-      setTimeout(() => { setCopied(false); setShowMenu(false); }, 1500);
     } catch {
-      // Fallback for older browsers
       const input = document.createElement('input');
       input.value = shareUrl;
       document.body.appendChild(input);
       input.select();
       document.execCommand('copy');
       document.body.removeChild(input);
-      setCopied(true);
-      setTimeout(() => { setCopied(false); setShowMenu(false); }, 1500);
     }
+    trackShare();
+    setCopied(true);
+    setTimeout(() => { setCopied(false); setShowMenu(false); }, 1500);
+  };
+
+  const handleSocialClick = () => {
+    trackShare();
+    setShowMenu(false);
   };
 
   const encodedUrl = encodeURIComponent(shareUrl);
@@ -90,10 +104,10 @@ export default function ShareButton({ title, text, url }) {
                    hover:border-brand-300 dark:hover:border-brand-700 hover:text-brand-600 dark:hover:text-brand-400
                    transition-all"
       >
-        <Share2 size={16} /> Share
+        <Share2 size={16} />
+        <span>{shareCount > 0 ? shareCount : 'Share'}</span>
       </button>
 
-      {/* Fallback dropdown for desktop / browsers without Web Share API */}
       {showMenu && (
         <div className="absolute bottom-full mb-2 right-0 w-52 bg-white dark:bg-surface-dark-card rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden z-50">
           <button
@@ -109,7 +123,7 @@ export default function ShareButton({ title, text, url }) {
               href={s.href}
               target="_blank"
               rel="noopener noreferrer"
-              onClick={() => setShowMenu(false)}
+              onClick={handleSocialClick}
               className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
             >
               <s.icon size={15} /> {s.label}
