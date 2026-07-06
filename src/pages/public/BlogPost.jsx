@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { ArrowLeft, Calendar, Clock, Eye } from 'lucide-react';
-import { getBlogPostBySlug, incrementPostViews, trackEvent } from '../../lib/api';
+import { ArrowLeft, Calendar, Clock, Eye, Heart, Share2 } from 'lucide-react';
+import { getBlogPostBySlug, incrementPostViews, trackEvent, getPostLikeCount } from '../../lib/api';
 import { formatFullDate, readingTime } from '../../lib/utils';
 import SEO from '../../components/ui/SEO';
 import LikeButton from '../../components/blog/LikeButton';
@@ -13,6 +13,7 @@ import ShareButton from '../../components/blog/ShareButton';
 export default function BlogPost() {
   const { slug } = useParams();
   const [post, setPost] = useState(null);
+  const [likeCount, setLikeCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -22,6 +23,7 @@ export default function BlogPost() {
         setPost(data);
         incrementPostViews(data.id);
         trackEvent('blog_view', `/blog/${slug}`, { title: data.title });
+        getPostLikeCount(data.id).then(setLikeCount);
       })
       .catch(() => {})
       .finally(() => setLoading(false));
@@ -85,8 +87,16 @@ export default function BlogPost() {
               <Clock size={14} /> {readingTime(post.content)}
             </span>
             <span className="flex items-center gap-1.5">
-              <Eye size={14} /> {post.views_count || 0} views
+              <Eye size={14} /> {post.views_count || 0}
             </span>
+            <span className="flex items-center gap-1.5">
+              <Heart size={14} className={likeCount > 0 ? 'text-pink-500' : ''} /> {likeCount}
+            </span>
+            {(post.shares_count || 0) > 0 && (
+              <span className="flex items-center gap-1.5">
+                <Share2 size={14} /> {post.shares_count}
+              </span>
+            )}
           </div>
         </header>
 
@@ -104,11 +114,13 @@ export default function BlogPost() {
 
         {/* Like + Share */}
         <div className="mt-10 pt-6 border-t border-slate-200 dark:border-slate-700 flex items-center gap-3">
-          <LikeButton postId={post.id} />
+          <LikeButton postId={post.id} onCountChange={setLikeCount} />
           <ShareButton
+            postId={post.id}
             title={post.title}
             text={post.excerpt || post.title}
             url={window.location.href}
+            count={post.shares_count || 0}
           />
         </div>
 
