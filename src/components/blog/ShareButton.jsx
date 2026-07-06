@@ -9,8 +9,12 @@ export default function ShareButton({ postId, title, text, url, count = 0 }) {
   const menuRef = useRef(null);
 
   const shareUrl = url || window.location.href;
-  const shareText = text || '';
   const shareTitle = title || '';
+  // Truncate text for mobile share sheets — keep it under 200 chars, end at a word boundary
+  const rawText = text || '';
+  const shareText = rawText.length > 200
+    ? rawText.substring(0, 200).replace(/\s+\S*$/, '') + '…'
+    : rawText;
 
   useEffect(() => { setShareCount(count); }, [count]);
 
