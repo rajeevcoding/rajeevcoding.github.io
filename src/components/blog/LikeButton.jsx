@@ -3,7 +3,7 @@ import { Heart } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { getPostLikeCount, hasUserLikedPost, toggleLike } from '../../lib/api';
 
-export default function LikeButton({ postId }) {
+export default function LikeButton({ postId, onCountChange }) {
   const { user } = useAuth();
   const [liked, setLiked] = useState(false);
   const [count, setCount] = useState(0);
@@ -11,19 +11,24 @@ export default function LikeButton({ postId }) {
 
   useEffect(() => {
     if (!postId) return;
-    getPostLikeCount(postId).then(setCount);
+    getPostLikeCount(postId).then((c) => {
+      setCount(c);
+      onCountChange?.(c);
+    });
     if (user) {
       hasUserLikedPost(postId, user.id).then(setLiked);
     }
   }, [postId, user]);
 
   const handleToggle = async () => {
-    if (!user) return; // LoginPrompt handles this case
+    if (!user) return;
     setAnimating(true);
     try {
       const nowLiked = await toggleLike(postId, user.id);
       setLiked(nowLiked);
-      setCount((prev) => prev + (nowLiked ? 1 : -1));
+      const newCount = count + (nowLiked ? 1 : -1);
+      setCount(newCount);
+      onCountChange?.(newCount);
     } catch (err) {
       console.error('Like toggle failed:', err);
     }
