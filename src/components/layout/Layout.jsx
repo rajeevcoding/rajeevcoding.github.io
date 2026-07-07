@@ -5,10 +5,14 @@ import Footer from './Footer';
 import WelcomeModal from '../blog/WelcomeModal';
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../lib/supabase';
+import usePageView from '../../hooks/usePageView';
 
 export default function Layout() {
   const { user, loading } = useAuth();
   const [showWelcome, setShowWelcome] = useState(false);
+
+  // Track unique page views for all public pages
+  usePageView();
 
   useEffect(() => {
     if (loading || !user) {
@@ -16,15 +20,12 @@ export default function Layout() {
       return;
     }
 
-    // Check if this user has completed onboarding
     supabase
       .from('profiles')
       .select('has_onboarded')
       .eq('id', user.id)
       .single()
       .then(({ data }) => {
-        // Show modal if user exists but hasn't onboarded
-        // (admin email/password users are already onboarded via the dashboard)
         if (data && !data.has_onboarded) {
           setShowWelcome(true);
         }
