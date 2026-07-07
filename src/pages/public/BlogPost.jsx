@@ -2,8 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import rehypeHighlight from 'rehype-highlight';
-import 'highlight.js/styles/github-dark.min.css';
+import CodeBlock from '../../components/blog/CodeBlock';
 import { ArrowLeft, Calendar, Clock, Eye, Heart, Share2 } from 'lucide-react';
 import { getBlogPostBySlug, trackUniqueView, getPostLikeCount } from '../../lib/api';
 import { formatFullDate, readingTime } from '../../lib/utils';
@@ -116,7 +115,10 @@ export default function BlogPost() {
         )}
 
         <div className="prose prose-lg dark:prose-invert prose-headings:font-display prose-a:text-brand-600 dark:prose-a:text-brand-400 max-w-none">
-          <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            components={{ code: CodeBlock }}
+          >
             {post.content}
           </ReactMarkdown>
         </div>
