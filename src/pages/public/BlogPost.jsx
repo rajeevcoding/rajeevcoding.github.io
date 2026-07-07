@@ -3,8 +3,9 @@ import { useParams, Link } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { ArrowLeft, Calendar, Clock, Eye, Heart, Share2 } from 'lucide-react';
-import { getBlogPostBySlug, incrementPostViews, trackEvent, getPostLikeCount } from '../../lib/api';
+import { getBlogPostBySlug, trackUniqueView, getPostLikeCount } from '../../lib/api';
 import { formatFullDate, readingTime } from '../../lib/utils';
+import { useAuth } from '../../context/AuthContext';
 import SEO from '../../components/ui/SEO';
 import LikeButton from '../../components/blog/LikeButton';
 import CommentsSection from '../../components/blog/CommentsSection';
@@ -12,6 +13,7 @@ import ShareButton from '../../components/blog/ShareButton';
 
 export default function BlogPost() {
   const { slug } = useParams();
+  const { user, isAdmin } = useAuth();
   const [post, setPost] = useState(null);
   const [likeCount, setLikeCount] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -21,8 +23,13 @@ export default function BlogPost() {
     getBlogPostBySlug(slug)
       .then((data) => {
         setPost(data);
-        incrementPostViews(data.id);
-        trackEvent('blog_view', `/blog/${slug}`, { title: data.title });
+        // Track unique view (skips admin, only counts once per visitor)
+        trackUniqueView({
+          page: `/blog/${slug}`,
+          postId: data.id,
+          userId: user?.id,
+          isAdmin,
+        });
         getPostLikeCount(data.id).then(setLikeCount);
       })
       .catch(() => {})

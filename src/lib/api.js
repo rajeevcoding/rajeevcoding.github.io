@@ -110,6 +110,8 @@ export async function getBlogPostBySlug(slug) {
 }
 
 export async function incrementPostViews(id) {
+  // Deprecated: use trackUniqueView instead
+  // Kept for backwards compatibility but no longer called directly
   const { error } = await supabase.rpc('increment_views', { post_id: id });
   if (error) console.error('Failed to increment views:', error);
 }
@@ -117,6 +119,47 @@ export async function incrementPostViews(id) {
 export async function incrementPostShares(id) {
   const { error } = await supabase.rpc('increment_shares', { post_id: id });
   if (error) console.error('Failed to increment shares:', error);
+}
+
+// ── Unique View Tracking ────────────────────────────
+import { getVisitorId } from './visitor';
+
+/**
+ * Track a unique page or post view.
+ * Skips if the user is admin. Only increments on first view per visitor.
+ * Returns true if this was a new unique view.
+ */
+export async function trackUniqueView({ page = '', postId = null, userId = null, isAdmin = false }) {
+  // Skip admin views entirely
+  if (isAdmin) return false;
+
+  const visitorId = getVisitorId();
+
+  try {
+    const { data, error } = await supabase.rpc('track_unique_view', {
+      p_visitor_id: visitorId,
+      p_user_id: userId || null,
+      p_post_id: postId || null,
+      p_page: page,
+    });
+    if (error) {
+      console.error('View tracking failed:', error);
+      return false;
+    }
+    return !!data;
+  } catch (err) {
+    console.error('View tracking error:', err);
+    return false;
+  }
+}
+
+/**
+ * Get visitor stats for admin analytics dashboard.
+ */
+export async function getVisitorStats(daysBack = 30) {
+  const { data, error } = await supabase.rpc('get_visitor_stats', { days_back: daysBack });
+  if (error) throw error;
+  return data;
 }
 
 export async function upsertBlogPost(post) {
