@@ -1,15 +1,47 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Download, Github, Linkedin, Twitter } from 'lucide-react';
+import { ArrowRight, Download, Eye, Github, Linkedin, Twitter } from 'lucide-react';
 import Button from '../../components/ui/Button';
 import SectionHeading from '../../components/ui/SectionHeading';
 import SEO from '../../components/ui/SEO';
+import Modal from '../../components/ui/Modal';
 import { getProjects, getBlogPosts, getProfile, trackEvent } from '../../lib/api';
 
 export default function Home() {
   const [profile, setProfile] = useState(null);
   const [projects, setProjects] = useState([]);
   const [posts, setPosts] = useState([]);
+  const [resumeOpen, setResumeOpen] = useState(false);
+  const [downloading, setDownloading] = useState(false);
+
+  const handleDownloadResume = async () => {
+    if (!profile?.resume_url || downloading) return;
+    setDownloading(true);
+    try {
+      // Fetch + blob so the download works even though the file lives on
+      // a different origin (Supabase Storage), where the `download`
+      // attribute alone would be ignored by most browsers.
+      const res = await fetch(profile.resume_url);
+      if (!res.ok) throw new Error('Failed to fetch resume');
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const ext = profile.resume_url.split('.').pop().split('?')[0] || 'pdf';
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${(profile?.full_name || 'resume').replace(/\s+/g, '_')}.${ext}`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      trackEvent('resume_download', '/');
+    } catch {
+      // Fallback: open in a new tab if the fetch/blob approach fails
+      // (e.g. CORS not enabled on the storage bucket).
+      window.open(profile.resume_url, '_blank', 'noopener,noreferrer');
+    } finally {
+      setDownloading(false);
+    }
+  };
 
   useEffect(() => {
     trackEvent('page_view', '/');
@@ -61,11 +93,26 @@ export default function Home() {
                 </Button>
               </Link>
               {profile?.resume_url && (
-                <a href={profile.resume_url} target="_blank" rel="noopener noreferrer">
-                  <Button variant="ghost" size="lg">
-                    <Download size={18} /> Resume
+                <>
+                  <Button
+                    variant="ghost"
+                    size="lg"
+                    onClick={() => {
+                      trackEvent('resume_view', '/');
+                      setResumeOpen(true);
+                    }}
+                  >
+                    <Eye size={18} /> View Resume
                   </Button>
-                </a>
+                  <Button
+                    variant="ghost"
+                    size="lg"
+                    onClick={handleDownloadResume}
+                    loading={downloading}
+                  >
+                    <Download size={18} /> Download
+                  </Button>
+                </>
               )}
             </div>
 
@@ -217,6 +264,22 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* ── Resume Viewer Modal ─────────────────────── */}
+      <Modal open={resumeOpen} onClose={() => setResumeOpen(false)} title="Resume" wide>
+        <div className="h-[75vh]">
+          <iframe
+            src={profile?.resume_url}
+            title="Resume"
+            className="w-full h-full rounded-lg border border-slate-200 dark:border-slate-700"
+          />
+        </div>
+        <div className="mt-4 flex justify-end">
+          <Button onClick={handleDownloadResume} loading={downloading}>
+            <Download size={18} /> Download
+          </Button>
+        </div>
+      </Modal>
     </>
   );
 }
